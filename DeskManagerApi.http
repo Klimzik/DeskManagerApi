@@ -1,0 +1,6 @@
+@DeskManagerApi_HostAddress = http://localhost:5237
+
+GET {{DeskManagerApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
