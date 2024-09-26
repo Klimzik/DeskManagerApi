@@ -21,6 +21,8 @@ namespace DeskManagerApi.Controllers
         public async Task<ActionResult<DeskOccupancy>> AddDeskOccupancy(DeskOccupancy deskOccupancy)
         {
             _context.DeskOccupancies.Add(deskOccupancy);
+            deskOccupancy.ReservationDate = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetDeskOccupancyById), new { id = deskOccupancy.Id }, deskOccupancy);
         }
