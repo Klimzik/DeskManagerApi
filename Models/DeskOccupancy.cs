@@ -10,5 +10,6 @@ namespace DeskManagerApi.Models
         public int DeskNumber { get; set; }
         public string WorkerEmail { get; set; }
         public DateTime ReservationDate { get; set; } 
+        public bool IsOccupated { get; set; }
     }
 }

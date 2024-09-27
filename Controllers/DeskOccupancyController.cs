@@ -1,5 +1,6 @@
 ﻿using DeskManagerApi.Data;
 using DeskManagerApi.Models;
+using DeskManagerApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,41 +10,69 @@ namespace DeskManagerApi.Controllers
     [ApiController]
     public class DeskOccupancyController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly DeskOccupancyService _deskOccupancyService;
 
-        public DeskOccupancyController(AppDbContext context)
+
+        public DeskOccupancyController(DeskOccupancyService deskOccupancyService)
         {
-            _context = context;
+            _deskOccupancyService = deskOccupancyService;
         }
 
-        // POST: api/DeskOccupancy
         [HttpPost]
         public async Task<ActionResult<DeskOccupancy>> AddDeskOccupancy(DeskOccupancy deskOccupancy)
         {
-            _context.DeskOccupancies.Add(deskOccupancy);
             deskOccupancy.ReservationDate = DateTime.UtcNow;
+            var addDeskOccupancy = await _deskOccupancyService.AddDeskOccupancyAsync(deskOccupancy);
 
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetDeskOccupancyById), new { id = deskOccupancy.Id }, deskOccupancy);
+            return Ok(addDeskOccupancy);
         }
 
-        // GET: api/DeskOccupancy
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DeskOccupancy>>> GetDeskOccupancies()
+        public async Task<ActionResult<IEnumerable<DeskOccupancy>>> GetDesksOccupancie()
         {
-            return await _context.DeskOccupancies.ToListAsync();
+            var deskOccupancies = await _deskOccupancyService.GetAllDeskOccupanciesAsync();
+            return Ok(deskOccupancies);
         }
 
-        // GET: api/DeskOccupancy/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DeskOccupancy>> GetDeskOccupancyById(int id)
         {
-            var deskOccupancy = await _context.DeskOccupancies.FindAsync(id);
+            var deskOccupancy = await _deskOccupancyService.GetDeskOccupancyByIdAsync(id);
             if (deskOccupancy == null)
             {
                 return NotFound();
             }
+            return Ok(deskOccupancy);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<DeskOccupancy>> DeleteDeskOccupancy(int id)
+        {
+            var deskOccupancy = await _deskOccupancyService.GetDeskOccupancyByIdAsync(id);
+            if (deskOccupancy == null)
+            {
+                return NotFound();
+            }
+
+            await _deskOccupancyService.DeleteDeskOccupancyAsync(id);
+
+            return Ok();
+        }
+
+        [HttpPut("Release/{id}")]
+        public async Task<ActionResult<DeskOccupancy>> ReleaseDeskOccupancy(int id)
+        {
+            var deskOccupancy = await _deskOccupancyService.GetDeskOccupancyByIdAsync(id);
+            if (deskOccupancy == null)
+            {
+                return NotFound();
+            }
+
+            deskOccupancy.IsOccupated = false;
+            await _deskOccupancyService.UpdateDeskOccupancyAsync();
+
             return deskOccupancy;
         }
+
     }
 }
