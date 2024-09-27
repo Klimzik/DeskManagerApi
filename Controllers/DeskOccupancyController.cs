@@ -1,8 +1,6 @@
-﻿using DeskManagerApi.Data;
-using DeskManagerApi.Models;
+﻿using DeskManagerApi.Models;
 using DeskManagerApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DeskManagerApi.Controllers
 {
@@ -11,7 +9,6 @@ namespace DeskManagerApi.Controllers
     public class DeskOccupancyController : ControllerBase
     {
         private readonly DeskOccupancyService _deskOccupancyService;
-
 
         public DeskOccupancyController(DeskOccupancyService deskOccupancyService)
         {
@@ -27,8 +24,15 @@ namespace DeskManagerApi.Controllers
             return Ok(addDeskOccupancy);
         }
 
+        [HttpPost("Filtered")]
+        public async Task<ActionResult<List<DeskOccupancy>>> GetFilteredDesksOccupancies([FromBody] DeskOccupancyFilter filter)
+        {
+            var deskOccupancies = await _deskOccupancyService.GetFilteredDeskOccupanciesAsync(filter);
+            return Ok(deskOccupancies);
+        }
+
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DeskOccupancy>>> GetDesksOccupancie()
+        public async Task<ActionResult<List<DeskOccupancy>>> GetDesksOccupancie()
         {
             var deskOccupancies = await _deskOccupancyService.GetAllDeskOccupanciesAsync();
             return Ok(deskOccupancies);

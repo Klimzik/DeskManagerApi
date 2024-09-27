@@ -25,6 +25,30 @@ namespace DeskManagerApi.Services
             return await _context.DeskOccupancies.ToListAsync();
         }
 
+        public async Task<List<DeskOccupancy>> GetFilteredDeskOccupanciesAsync(DeskOccupancyFilter filter)
+        {
+            var query = _context.DeskOccupancies.AsQueryable();
+
+            if (filter.FloorNumber.HasValue)
+            {
+                query = query.Where(d => d.FloorNumber == filter.FloorNumber.Value);
+            }
+
+            if (!string.IsNullOrEmpty(filter.WorkerEmail))
+            {
+                query = query.Where(d => d.WorkerEmail == filter.WorkerEmail);
+            }
+
+            if (!string.IsNullOrEmpty(filter.ReservationDate) && DateTime.TryParse(filter.ReservationDate, out var reservationDate))
+            {
+                var utcReservationDate = DateTime.SpecifyKind(reservationDate, DateTimeKind.Utc);
+
+                query = query.Where(d => d.ReservationDate.Date == utcReservationDate.Date);
+            }
+
+            return await query.ToListAsync();
+        }
+
         public async Task<DeskOccupancy> GetDeskOccupancyByIdAsync(int id)
         {
             return await _context.DeskOccupancies.FindAsync(id);
